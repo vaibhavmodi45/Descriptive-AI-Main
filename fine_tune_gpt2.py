@@ -1,32 +1,25 @@
-# fine_tune_gpt2.py
 import pandas as pd
 from datasets import Dataset
 from transformers import GPT2LMHeadModel, GPT2Tokenizer, Trainer, TrainingArguments, DataCollatorForLanguageModeling
 
 def load_and_prepare_dataset(csv_path):
-    # Load the CSV file into a pandas DataFrame
     df = pd.read_csv(csv_path)
     
-    # Combine the 'Input' and 'Output' columns to create the training text
     df['text'] = df['Input'] + " " + df['Output']
     
-    # Convert the DataFrame to a Hugging Face Dataset
     dataset = Dataset.from_pandas(df[['text']])
     return dataset
 
 def main():
     model_name = 'gpt2'
     tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-    
-    # Set the padding token
+
     tokenizer.pad_token = tokenizer.eos_token
     
     model = GPT2LMHeadModel.from_pretrained(model_name)
 
-    # Load and prepare the dataset
     dataset = load_and_prepare_dataset('50dataset.csv')
-    
-    # Tokenize the dataset
+
     def tokenize_function(examples):
         return tokenizer(examples['text'], truncation=True, padding='max_length', max_length=128)
     
